@@ -23,3 +23,24 @@ export type InitialDataResponse = {
     month: number;
   }
 };
+
+export type CoinDetailsResponse = {
+  buy: {
+    id: number;
+    icon: string | null;
+    name: string;
+    pricebtc: number;
+    priceeth: number;
+    price: number;
+  };
+  sell: {
+    id: number;
+    icon: string | null;
+    name: string;
+    pricebtc: number;
+    priceeth: number;
+    price: number;
+  };
+  profit: number;
+  pair: string;
+};

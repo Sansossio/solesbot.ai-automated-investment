@@ -1,8 +1,9 @@
 import axios from 'axios'
 import qs from 'qs'
-import { CookieManager } from "./cookie.manager";
+import { CookieManager } from "../services/cookie.manager";
 import { CONFIG } from '../config';
-import { BalanceResponse, HomeResponse, InitialDataResponse } from './types/solesbot.response';
+import { BalanceResponse, CoinDetailsResponse, HomeResponse, InitialDataResponse } from './types/solesbot.response';
+import { SolesBotCoins } from './enum/coins';
 
 export class SolesbotService {
   private readonly cookieManager = new CookieManager()
@@ -122,5 +123,19 @@ export class SolesbotService {
       },
       pnl,
     }
+  }
+
+  async getCoinDetails(coin: SolesBotCoins): Promise<CoinDetailsResponse> {
+    const { data } = await this.transport.get('/robot/suggestionManual',{
+      params: {
+        coin: coin
+      }
+    })
+
+    return data
+  }
+
+  async getCoins(coins: SolesBotCoins[]): Promise<CoinDetailsResponse[]> {
+    return Promise.all(coins.map((coin) => this.getCoinDetails(coin)))
   }
 }

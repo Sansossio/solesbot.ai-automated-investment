@@ -52,7 +52,7 @@ export class CookieManager {
         this.cookies.set(key, value);
       }
     } catch (err) {
-      console.error('Error loading cookies:', err);
+      console.warn('Error loading cookies:', err);
     }
   }
 
@@ -61,7 +61,7 @@ export class CookieManager {
       const data = JSON.stringify(Array.from(this.cookies.entries())); // Convert Map to array and stringify
       fs.writeFileSync(this.cookiesPath, data, 'utf8');
     } catch (err) {
-      console.error('Error saving cookies:', err);
+      console.warn('Error saving cookies:', err);
     }
   }
 }
