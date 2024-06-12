@@ -5,6 +5,7 @@ import { CONFIG } from '../config';
 import { BalanceResponse, CoinDetailsResponse, HomeResponse, InitialDataResponse, ManualOperations, ManualOperationsResponse } from './types/solesbot.response';
 import { SolesBotCoins, getCoinByName } from './enum/coins';
 import { ManualOperationSituation } from './enum/manual-operation-situation';
+import { stringToNumber } from '../utils/number';
 
 export class SolesbotService {
   private readonly cookieManager = new CookieManager()
@@ -154,9 +155,9 @@ export class SolesbotService {
       },
       exchanges: operation.Exchanges,
       prices: operation.Prices,
-      amount: +operation.Amount,
-      percent: +operation.Percent,
-      percentWin: +operation.percentwin,
+      amount: stringToNumber(operation.Amount),
+      percent: stringToNumber(operation.Percent),
+      percentWin: stringToNumber(operation.percentwin),
       transaction: operation.Transaction,
       status: operation.Situation,
       link: operation.link,
