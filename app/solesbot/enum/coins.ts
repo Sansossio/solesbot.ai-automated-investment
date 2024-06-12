@@ -9,4 +9,12 @@ export enum SolesBotCoins {
   Polkadot = 11,
   Avalanche = 12,
   Chainlink = 13,
+  UNKNOWN = -1,
+}
+
+export function getCoinByName(name: string): SolesBotCoins {
+  const keys = Object.keys(SolesBotCoins);
+  const key = keys.find((key) => name.match(new RegExp(key, 'i')));
+
+  return SolesBotCoins[key as keyof typeof SolesBotCoins] || SolesBotCoins.UNKNOWN;
 }

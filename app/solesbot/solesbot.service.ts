@@ -2,8 +2,9 @@ import axios from 'axios'
 import qs from 'qs'
 import { CookieManager } from "../services/cookie.manager";
 import { CONFIG } from '../config';
-import { BalanceResponse, CoinDetailsResponse, HomeResponse, InitialDataResponse } from './types/solesbot.response';
-import { SolesBotCoins } from './enum/coins';
+import { BalanceResponse, CoinDetailsResponse, HomeResponse, InitialDataResponse, ManualOperations, ManualOperationsResponse } from './types/solesbot.response';
+import { SolesBotCoins, getCoinByName } from './enum/coins';
+import { ManualOperationSituation } from './enum/manual-operation-situation';
 
 export class SolesbotService {
   private readonly cookieManager = new CookieManager()
@@ -137,5 +138,34 @@ export class SolesbotService {
 
   async getCoins(coins: SolesBotCoins[]): Promise<CoinDetailsResponse[]> {
     return Promise.all(coins.map((coin) => this.getCoinDetails(coin)))
+  }
+
+  async getManualOperations(): Promise<ManualOperations[]> {
+    const { data: { result } } = await this.transport.post<{ result: ManualOperationsResponse[] }>('/robot/getManualOperation?p=0&period=7')
+
+    return result.map((operation): ManualOperations => ({
+      id: operation.ID,
+      key: operation.Key,
+      date: operation.Date,
+      hour: operation.Hour,
+      coin: {
+        id: getCoinByName(operation.Coin),
+        name: operation.Coin,
+      },
+      exchanges: operation.Exchanges,
+      prices: operation.Prices,
+      amount: +operation.Amount,
+      percent: +operation.Percent,
+      percentWin: +operation.percentwin,
+      transaction: operation.Transaction,
+      status: operation.Situation,
+      link: operation.link,
+    }))
+  }
+
+  async getPendingOperations(): Promise<ManualOperations[]> {
+    const operations = await this.getManualOperations()
+
+    return operations.filter((operation) => operation.status === ManualOperationSituation.Pending)
   }
 }

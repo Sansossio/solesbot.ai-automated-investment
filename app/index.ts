@@ -21,10 +21,14 @@ import { SolesbotService } from "./solesbot/solesbot.service"
     SolesBotCoins.Polkadot
   ]
 
-  const [cake, polkadot] = await service.getCoins(coins)
+  const [pendingOperations, [cake, polkadot]] = await Promise.all([
+    service.getPendingOperations(),
+    service.getCoins(coins)
+  ]);
 
   console.log(`Cake profit: ${cake.profit}`)
   console.log(`Polkadot profit: ${polkadot.profit}`)
+  console.log(`Pending operations: ${pendingOperations.map((operation) => operation.coin.name).join(', ')}`)
 
   console.timeEnd('Solesbot')
 })()
