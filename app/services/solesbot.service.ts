@@ -55,7 +55,7 @@ export class SolesbotService {
     const { data } = await this.transport.get('/')
 
     if (data.match(/Waiting Room/)) {
-      console.warn('Waiting Room detected, waiting for 1 minute and 5 seconds')
+      console.warn('Waiting Room detected, waiting for 25 seconds to try again')
 
       await this.awaitMs(CONFIG.SOLESBOT.WAIT_ROOM_TIMEOUT)
 
@@ -88,6 +88,8 @@ export class SolesbotService {
     if (!response.match(/\/dashboard/)) {
       throw new Error('Login failed')
     }
+
+    console.log('Logged in')
   }
 
   async getPnl (): Promise<{ day: number; week: number; month: number }> {
