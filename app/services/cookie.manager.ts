@@ -1,4 +1,6 @@
 import fs from 'fs';
+import { AxiosInstance } from 'axios';
+import { CONFIG } from '../config';
 
 const FIXED_COOKIE = ['Secure', 'HttpOnly', 'Partitioned', 'SameSite=None']
 
@@ -38,6 +40,34 @@ export class CookieManager {
       .join('; ');
 
     return `${response};`;
+  }
+
+  attachToAxios(axios: AxiosInstance) {
+    axios.interceptors.request.use((config) => {
+      const { headers } = config
+      const cookie = this.toString()
+      const referer = headers.referer || CONFIG.SOLESBOT.URL
+
+      if (cookie) {
+        headers.cookie = cookie
+      }
+
+      headers.referer = referer
+
+      return config
+    })
+
+    axios.interceptors.response.use((config) => {
+      const { headers } = config
+      const cookies = headers['set-cookie']
+      if (!cookies) {
+        return config
+      }
+
+      this.setCookie(cookies)
+
+      return config
+    })
   }
 
   private loadCookies() {

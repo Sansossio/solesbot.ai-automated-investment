@@ -15,7 +15,8 @@ export class SolesbotService {
   })
 
   constructor () {
-    this.interceptors()
+    this.cookieManager.attachToAxios(this.transport)
+    this.waitingRoom()
   }
 
   private async awaitMs (ms: number): Promise<void> {
@@ -26,44 +27,24 @@ export class SolesbotService {
     })
   }
 
-  private interceptors (): void {
-    this.transport.interceptors.request.use((config) => {
-      const { headers } = config
-      const cookie = this.cookieManager.toString()
-      const referer = headers.referer || CONFIG.SOLESBOT.URL
+  private waitingRoom (): void {
+    this.transport.interceptors.response.use(async (response) => {
+      const { data } = response
 
-      if (cookie) {
-        headers.cookie = cookie
+      if (typeof data === 'string' && data.match(/Waiting Room/)) {
+        console.warn('Waiting Room detected, waiting for 25 seconds to try again')
+
+        await this.awaitMs(CONFIG.SOLESBOT.WAIT_ROOM_TIMEOUT)
+
+        return this.transport(response.config)
       }
 
-      headers.referer = referer
-
-      return config
-    })
-
-    this.transport.interceptors.response.use((config) => {
-      const { headers } = config
-      const cookies = headers['set-cookie']
-      if (!cookies) {
-        return config
-      }
-
-      this.cookieManager.setCookie(cookies)
-
-      return config
+      return response
     })
   }
 
   async start (): Promise<void> {
-    const { data } = await this.transport.get('/')
-
-    if (data.match(/Waiting Room/)) {
-      console.warn('Waiting Room detected, waiting for 25 seconds to try again')
-
-      await this.awaitMs(CONFIG.SOLESBOT.WAIT_ROOM_TIMEOUT)
-
-      return this.start()
-    }
+    await this.transport.get('/')
 
     console.log('Initialized')
   }
