@@ -8,14 +8,12 @@ import { ManualOperationSituation } from './enum/manual-operation-situation';
 import { stringToNumber } from '../utils/number';
 
 export class SolesbotService {
-  private readonly cookieManager = new CookieManager()
-
   private readonly transport = axios.create({
     baseURL: CONFIG.SOLESBOT.URL,
   })
 
   constructor () {
-    this.cookieManager.attachToAxios(this.transport)
+    CookieManager.fromAxios(this.transport)
     this.waitingRoom()
   }
 

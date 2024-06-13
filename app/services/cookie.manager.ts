@@ -42,34 +42,6 @@ export class CookieManager {
     return `${response};`;
   }
 
-  attachToAxios(axios: AxiosInstance) {
-    axios.interceptors.request.use((config) => {
-      const { headers } = config
-      const cookie = this.toString()
-      const referer = headers.referer || CONFIG.SOLESBOT.URL
-
-      if (cookie) {
-        headers.cookie = cookie
-      }
-
-      headers.referer = referer
-
-      return config
-    })
-
-    axios.interceptors.response.use((config) => {
-      const { headers } = config
-      const cookies = headers['set-cookie']
-      if (!cookies) {
-        return config
-      }
-
-      this.setCookie(cookies)
-
-      return config
-    })
-  }
-
   private loadCookies() {
     if (!fs.existsSync(this.cookiesPath)) {
       return;
@@ -93,5 +65,35 @@ export class CookieManager {
     } catch (err) {
       console.warn('Error saving cookies:', err);
     }
+  }
+
+  static fromAxios(axios: AxiosInstance) {
+    const instance = new CookieManager();
+
+    axios.interceptors.request.use((config) => {
+      const { headers } = config
+      const cookie = instance.toString()
+      const referer = headers.referer || CONFIG.SOLESBOT.URL
+
+      if (cookie) {
+        headers.cookie = cookie
+      }
+
+      headers.referer = referer
+
+      return config
+    })
+
+    axios.interceptors.response.use((config) => {
+      const { headers } = config
+      const cookies = headers['set-cookie']
+      if (!cookies) {
+        return config
+      }
+
+      instance.setCookie(cookies)
+
+      return config
+    })
   }
 }
