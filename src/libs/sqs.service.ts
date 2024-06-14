@@ -1,5 +1,5 @@
 import { SQS } from "aws-sdk";
-import { SolesbotOperatorEvent } from "@solesbot";
+import { SolesbotOperatorEvent } from "@/solesbot";
 
 export class SqsService {
   private readonly sqs = new SQS({

@@ -1,5 +1,5 @@
-import { formatJSONResponse, type ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
-import { SolesBotCoins, SolesbotOperatorEvent, SolesbotService } from '@solesbot';
+import { formatJSONResponse, type ValidatedEventAPIGatewayProxyEvent } from '@/libs/api-gateway';
+import { SolesBotCoins, SolesbotOperatorEvent, SolesbotService } from '@/solesbot';
 import { SQSHandler } from 'aws-lambda';
 
 const operator = async (event: SolesbotOperatorEvent) => {

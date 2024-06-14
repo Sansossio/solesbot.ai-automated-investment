@@ -11,3 +11,6 @@ jspm_packages
 # docker
 volume
 .env
+
+# test
+coverage

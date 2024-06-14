@@ -1,12 +1,12 @@
 import axios from 'axios'
 import qs from 'qs'
-import { CookieManager } from "@libs/cookie.manager";
+import { CookieManager } from "@/libs/cookie.manager";
 import { CONFIG } from './config';
 import { BalanceResponse, CoinDetailsResponse, HomeResponse, InitialDataResponse, ManualOperations, ManualOperationsResponse } from './types/solesbot.response';
 import { SolesBotCoins, getCoinByName } from './enum/coins';
 import { ManualOperationSituation } from './enum/manual-operation-situation';
-import { stringToNumber } from '@libs/utils';
-import { Cookies } from '@libs/cookie.manager'
+import { stringToNumber } from '@/libs/utils';
+import { Cookies } from '@/libs/cookie.manager'
 
 type RegisterSolbotService = {
   initialCookies?: Cookies;
@@ -17,10 +17,15 @@ export class SolesbotService {
   private readonly transport = axios.create({
     baseURL: CONFIG.URL,
   });
+  private userData: InitialDataResponse;
 
   constructor (config: RegisterSolbotService = {}) {
     CookieManager.fromAxios(this.transport, config)
     this.waitingRoom()
+  }
+
+  get user (): InitialDataResponse {
+    return this.userData
   }
 
   private async awaitMs (ms: number): Promise<void> {
@@ -78,6 +83,8 @@ export class SolesbotService {
     }
 
     console.log('Logged in')
+
+    await this.getData();
   }
 
   async getPnl (): Promise<{ day: number; week: number; month: number }> {
@@ -102,7 +109,7 @@ export class SolesbotService {
       this.getPnl(),
     ])
 
-    return {
+    this.userData = {
       home: dataHome.data,
       balance: {
         balance: +balance.data,
@@ -110,6 +117,8 @@ export class SolesbotService {
       },
       pnl,
     }
+
+    return this.userData
   }
 
   async getCoinDetails(coin: SolesBotCoins): Promise<CoinDetailsResponse> {
@@ -153,5 +162,9 @@ export class SolesbotService {
     const operations = await this.getManualOperations()
 
     return operations.filter((operation) => operation.status === ManualOperationSituation.Pending)
+  }
+
+  async buy(coin: SolesBotCoins, amount: number): Promise<void> {
+    console.log(`Buying ${amount} of ${coin}`)
   }
 }

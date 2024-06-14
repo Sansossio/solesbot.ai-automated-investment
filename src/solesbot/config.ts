@@ -5,4 +5,8 @@ export const CONFIG = {
   COOKIES: {
     PATH: 'cookies.json',
   },
+  WAIT_PROFIT: {
+    TIME: 18 * 1000, // 18 seconds
+    RETRIES: 10, // 3 minutes
+  }
 }

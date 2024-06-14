@@ -1,9 +1,9 @@
-import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
-import { formatJSONResponse } from '@libs/api-gateway';
-import { S3Service } from '@libs/s3.service';
+import type { ValidatedEventAPIGatewayProxyEvent } from '@/libs/api-gateway';
+import { formatJSONResponse } from '@/libs/api-gateway';
+import { S3Service } from '@/libs/s3.service';
 
-import { Cookies } from '@libs/cookie.manager';
-import { SolesbotService } from '@solesbot';
+import { Cookies } from '@/libs/cookie.manager';
+import { SolesbotService } from '@/solesbot';
 import { SqsService } from '../../libs/sqs.service';
 import { ACCOUNTS } from '../../solesbot/accounts';
 

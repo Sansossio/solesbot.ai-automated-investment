@@ -28,7 +28,7 @@ export type InitialDataResponse = {
 };
 
 export type CoinDetailsResponse = {
-  buy: {
+  buy?: {
     id: number;
     icon: string | null;
     name: string;
@@ -36,7 +36,7 @@ export type CoinDetailsResponse = {
     priceeth: number;
     price: number;
   };
-  sell: {
+  sell?: {
     id: number;
     icon: string | null;
     name: string;
@@ -45,7 +45,7 @@ export type CoinDetailsResponse = {
     price: number;
   };
   profit: number;
-  pair: string;
+  pair?: string;
 };
 
 export type ManualOperationsResponse = {
