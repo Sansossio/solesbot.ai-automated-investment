@@ -4,5 +4,5 @@ export const CONFIG = {
   BUCKET: 'solesbot',
   COOKIES: {
     PATH: 'cookies.json',
-  }
+  },
 }

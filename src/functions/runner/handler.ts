@@ -1,22 +1,26 @@
 import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
 import { formatJSONResponse } from '@libs/api-gateway';
-import { middyfy } from '@libs/lambda';
 import { S3Service } from '@libs/s3.service';
 
-import schema from './schema';
 import { Cookies } from '@libs/cookie.manager';
-import { SolesBotCoins, SolesbotService } from '@solesbot';
+import { SolesbotService } from '@solesbot';
+import { SqsService } from '../../libs/sqs.service';
+import { ACCOUNTS } from '../../solesbot/accounts';
 
 const bucketName = 'solesbot-aws';
 const keyName = 'cookies.json';
 
 const s3Service = new S3Service()
+const sqsService = new SqsService()
+
+let cookiesCache = new Map<string, string | number>();
 
 async function updateCookies(cookies: Cookies) {
+  cookiesCache = cookies;
   await s3Service.putObject(bucketName, keyName, JSON.stringify(Object.fromEntries(cookies)));
 }
 
-const hello: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (_event) => {
+export const main: ValidatedEventAPIGatewayProxyEvent<any> = async (_event) => {
   const cookiesSaved = await s3Service.getObjectParsed(bucketName, keyName);
 
   const initialCookies = typeof cookiesSaved === 'object' ? new Map<string, string | number>(Object.entries(cookiesSaved)) : undefined;
@@ -32,29 +36,19 @@ const hello: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (_event) 
 
   await service.start();
 
-  await service.login(
-    process.env.SOLESBOT_EMAIL!,
-    process.env.SOLESBOT_PASSWORD!
-  )
+  const cookiesAsObject = Object.fromEntries(cookiesCache);
 
-  const data = await service.getData()
-
-  const coins = [
-    SolesBotCoins.CAKE,
-    SolesBotCoins.Polkadot
-  ]
-
-  const [pendingOperations, [cake, polkadot]] = await Promise.all([
-    service.getPendingOperations(),
-    service.getCoins(coins)
-  ]);
+  for (const account of ACCOUNTS) {
+    await sqsService.sendToOperate(process.env.OPERATE_SQS_QUEUE_URL!, {
+      email: account.email,
+      password: account.password,
+      cookies: cookiesAsObject,
+      strategies: [1]
+    });
+  }
 
   return formatJSONResponse({
-    data,
-    pendingOperations,
-    cake,
-    polkadot,
+    cookies: cookiesAsObject
   });
 };
 
-export const main = middyfy(hello);

@@ -5,15 +5,15 @@
   "main": "serverless.ts",
   "scripts": {
     "offline": "sls offline --stage local",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy:prod": "AWS_PROFILE=personal sls deploy --stage prod"
   },
   "engines": {
     "node": ">=14.15.0"
   },
   "dependencies": {
-    "@middy/core": "^3.4.0",
-    "@middy/http-json-body-parser": "^3.4.0",
-    "aws-sdk": "^2.1641.0"
+    "aws-sdk": "^2.1641.0",
+    "axios": "^1.7.2"
   },
   "devDependencies": {
     "@serverless/typescript": "^3.0.0",
@@ -25,6 +25,7 @@
     "serverless-esbuild": "^1.23.3",
     "serverless-localstack": "^1.2.0",
     "serverless-offline": "^13.6.0",
+    "serverless-offline-sqs-external": "^1.0.6",
     "ts-node": "^10.4.0",
     "tsconfig-paths": "^3.9.0",
     "typescript": "^4.1.3"

@@ -1,11 +1,14 @@
 import type { AWS } from '@serverless/typescript';
 
-import hello from '@functions/hello';
+import runner from './src/functions/runner';
+import operator from './src/functions/operator';
+
+const localRegion = 'us-west-1';
 
 const serverlessConfiguration: AWS = {
   service: 'solesbot-aws',
   frameworkVersion: '3',
-  plugins: ['serverless-esbuild', 'serverless-offline', 'serverless-localstack'],
+  plugins: ['serverless-offline-sqs-external', 'serverless-esbuild', 'serverless-offline', 'serverless-localstack'],
   provider: {
     name: 'aws',
     runtime: 'nodejs20.x',
@@ -17,9 +20,23 @@ const serverlessConfiguration: AWS = {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
     },
+    iamRoleStatements: [
+      {
+        Effect: 'Allow',
+        Action: ['s3:*'],
+        Resource: '*'
+      },
+      {
+        Effect: 'Allow',
+        Action: ['sqs:*'],
+        Resource: {
+          'Fn::GetAtt': ['SolesbotOperateQueue', 'Arn'],
+        },
+      },
+    ],
   },
   // import the function via paths
-  functions: { hello },
+  functions: { runner, operator },
   package: { individually: true },
   resources: {
     Resources: {
@@ -30,6 +47,14 @@ const serverlessConfiguration: AWS = {
           BucketName: 'solesbot-aws',
         },
       },
+      // Operation queue
+      SolesbotOperateQueue: {
+        Type: 'AWS::SQS::Queue',
+        Properties: {
+          QueueName: 'solesbot-aws-operate',
+          VisibilityTimeout: 15 * 60,
+        },
+      },
     }
   },
   custom: {
@@ -37,15 +62,37 @@ const serverlessConfiguration: AWS = {
       bundle: true,
       minify: false,
       sourcemap: true,
-      exclude: ['aws-sdk'],
+      exclude: [],
       target: 'node20',
       define: { 'require.resolve': undefined },
       platform: 'node',
       concurrency: 10,
     },
+    'serverless-offline-sqs-external': {
+      autoCreate: true,
+      host: 'localhost',
+      port: 4566,
+      region: localRegion,
+      https: false,
+      apiVersion: '2012-11-05',
+      accessKeyId: 'root',
+      secretAccessKey: 'root',
+      skipCacheInvalidation: false,
+    },
+    'serverless-offline-s3': {
+      host: 'localhost',
+      port: 4566,
+      region: localRegion,
+    },
     localstack: {
       stages: ['local'],
     },
+    sqs: {
+      // get SolesbotOperateQueue URL
+      operateQueueUrl: {
+        Ref: 'SolesbotOperateQueue',
+      }
+    }
   },
 };
 
