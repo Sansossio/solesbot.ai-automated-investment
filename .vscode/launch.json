@@ -1,18 +1,11 @@
 {
-  "version": "1.0.0",
   "configurations": [
     {
-      "name": "Launch Program",
-      "program": "${workspaceFolder}/app/index.ts",
+      "command": "yarn offline",
+      "name": "Run start offline",
       "request": "launch",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "type": "node",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["--nolazy", "-r", "ts-node/register/transpile-only"],
+      "type": "node-terminal",
       "envFile": "${workspaceFolder}/.env"
     }
-    
   ]
 }

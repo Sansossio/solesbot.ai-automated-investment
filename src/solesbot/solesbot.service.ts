@@ -1,19 +1,25 @@
 import axios from 'axios'
 import qs from 'qs'
-import { CookieManager } from "../services/cookie.manager";
-import { CONFIG } from '../config';
+import { CookieManager } from "@libs/cookie.manager";
+import { CONFIG } from './config';
 import { BalanceResponse, CoinDetailsResponse, HomeResponse, InitialDataResponse, ManualOperations, ManualOperationsResponse } from './types/solesbot.response';
 import { SolesBotCoins, getCoinByName } from './enum/coins';
 import { ManualOperationSituation } from './enum/manual-operation-situation';
-import { stringToNumber } from '../utils/number';
+import { stringToNumber } from '@libs/utils';
+import { Cookies } from '@libs/cookie.manager'
+
+type RegisterSolbotService = {
+  initialCookies?: Cookies;
+  onCookiesUpdated?: (cookies: Cookies) => Promise<void>;
+};
 
 export class SolesbotService {
   private readonly transport = axios.create({
-    baseURL: CONFIG.SOLESBOT.URL,
-  })
+    baseURL: CONFIG.URL,
+  });
 
-  constructor () {
-    CookieManager.fromAxios(this.transport)
+  constructor (config: RegisterSolbotService = {}) {
+    CookieManager.fromAxios(this.transport, config)
     this.waitingRoom()
   }
 
@@ -32,7 +38,7 @@ export class SolesbotService {
       if (typeof data === 'string' && data.match(/Waiting Room/)) {
         console.warn('Waiting Room detected, waiting for 25 seconds to try again')
 
-        await this.awaitMs(CONFIG.SOLESBOT.WAIT_ROOM_TIMEOUT)
+        await this.awaitMs(CONFIG.WAIT_ROOM_TIMEOUT)
 
         return this.transport(response.config)
       }
