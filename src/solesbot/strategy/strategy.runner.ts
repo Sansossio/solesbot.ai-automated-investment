@@ -46,7 +46,11 @@ export class StrategyRunner {
         continue
       }
 
-      await this.service.buy(coin.coin, amount)
+      try {
+        await this.service.buy(coin.coin, amount)
+      } catch (e) {
+        console.error(`Error buying ${coin.coin}`, e)
+      }
     }
   }
 }
