@@ -39,7 +39,14 @@ export class StrategyRunner {
         break
       }
 
-      await this.service.buy(coin.coin, coin.amount)
+      const amount = Math.min(coin.amount, this.service.user.balance.available)
+
+      if (amount < 1) {
+        console.log(`Not enough balance to buy ${coin.coin}`)
+        continue
+      }
+
+      await this.service.buy(coin.coin, amount)
     }
   }
 }

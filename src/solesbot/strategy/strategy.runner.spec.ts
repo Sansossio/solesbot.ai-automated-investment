@@ -137,6 +137,64 @@ describe('StrategyRunner', () => {
     });
   });
 
+  describe('fill', () => {
+    it('should buy coin when fill is true', async () => {
+      user.mockReturnValue({
+        balance: {
+          available: 100,
+          balance: 0
+        },
+      } as any);
+
+      getPendingOperations.mockResolvedValue([]);
+      getCoinDetails.mockResolvedValue({
+        profit: 0.1
+      });
+
+      await runner.run({
+        coins: [
+          {
+            coin: SolesBotCoins.CAKE,
+            amount: 200,
+            minProfit: 0.05,
+            fill: true
+          }
+        ]
+      });
+
+      expect(buy).toHaveBeenCalledWith(SolesBotCoins.CAKE, 100);
+      expect(wait).not.toHaveBeenCalled();
+    });
+
+    it('should not buy coin when amount is less than 1', async () => {
+      user.mockReturnValue({
+        balance: {
+          available: 0,
+          balance: 0.02
+        },
+      } as any);
+
+      getPendingOperations.mockResolvedValue([]);
+      getCoinDetails.mockResolvedValue({
+        profit: 0.1
+      });
+
+      await runner.run({
+        coins: [
+          {
+            coin: SolesBotCoins.CAKE,
+            amount: 0.01,
+            minProfit: 0.05,
+            fill: true
+          }
+        ]
+      });
+
+      expect(buy).not.toHaveBeenCalled();
+      expect(wait).not.toHaveBeenCalled();
+    });
+  });
+
   describe('retries', () => {
     it('should retry until profit is greater than minProfit', async () => {
       user.mockReturnValue({
