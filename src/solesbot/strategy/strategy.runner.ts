@@ -12,16 +12,16 @@ export class StrategyRunner {
   async run (strategy: SolesbotStrategy): Promise<void> {
     const pendingOperations = await this.service.getPendingOperations()
 
-    const availableStrategies = strategy.coins.filter(coin => {
+    const coins = strategy.coins.filter(coin => {
       return !pendingOperations.some(operation => operation.coin.id === coin.coin)
     })
 
-    if (availableStrategies.length === 0) {
-      console.warn('No strategies to run')
+    if (coins.length === 0) {
+      console.warn('No coins to buy')
       return
     }
 
-    for (const coin of availableStrategies) {
+    for (const coin of coins) {
       const coinDetails = await this.service.getCoinDetails(coin.coin)
 
       const budget = this.calculateBudget(strategy, pendingOperations)
