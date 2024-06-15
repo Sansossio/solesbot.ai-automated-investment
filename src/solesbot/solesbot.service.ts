@@ -168,7 +168,7 @@ export class SolesbotService {
   async getPendingOperations (): Promise<ManualOperations[]> {
     const operations = await this.getManualOperations()
 
-    return operations.filter((operation) => operation.status === ManualOperationSituation.Pending)
+    return operations.filter((operation) => operation.status !== ManualOperationSituation.Executed)
   }
 
   async buy (coin: SolesBotCoins, amount: number): Promise<void> {
