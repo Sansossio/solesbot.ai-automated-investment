@@ -10,6 +10,7 @@ jspm_packages
 
 # docker
 volume
+localstack
 .env
 
 # test

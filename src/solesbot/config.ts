@@ -7,6 +7,6 @@ export const CONFIG = {
   },
   WAIT_PROFIT: {
     TIME: 10 * 1000, // 10 seconds
-    RETRIES: 18 // 3 minutes
+    RETRIES: 24 // 4 minutes
   }
 }
