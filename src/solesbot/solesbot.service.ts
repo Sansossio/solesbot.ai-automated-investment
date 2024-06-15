@@ -1,23 +1,28 @@
 import axios from 'axios'
-import qs from 'qs'
-import { CookieManager } from "@/libs/cookie.manager";
-import { CONFIG } from './config';
-import { BalanceResponse, CoinDetailsResponse, HomeResponse, UserBalance, ManualOperations, ManualOperationsResponse, Pnl } from './types/solesbot.response';
-import { SolesBotCoins, getCoinByName } from './enum/coins';
-import { ManualOperationSituation } from './enum/manual-operation-situation';
-import { stringToNumber } from '@/libs/utils';
-import { Cookies } from '@/libs/cookie.manager'
+import * as qs from 'qs'
+import { CookieManager, Cookies } from '@/libs/cookie.manager'
+import { CONFIG } from './config'
+import { BalanceResponse, CoinDetailsResponse, HomeResponse, UserBalance, ManualOperations, ManualOperationsResponse, Pnl } from './types/solesbot.response'
+import { SolesBotCoins, getCoinByName } from './enum/coins'
+import { ManualOperationSituation } from './enum/manual-operation-situation'
+import { stringToNumber } from '@/libs/utils'
 
-type RegisterSolbotService = {
-  initialCookies?: Cookies;
-  onCookiesUpdated?: (cookies: Cookies) => Promise<void>;
-};
+interface RegisterSolbotService {
+  initialCookies?: Cookies
+  onCookiesUpdated?: (cookies: Cookies) => Promise<void>
+}
 
 export class SolesbotService {
   private readonly transport = axios.create({
-    baseURL: CONFIG.URL,
-  });
-  private userBalance: UserBalance;
+    baseURL: CONFIG.URL
+  })
+
+  private userBalance: UserBalance = {
+    balance: {
+      balance: 0,
+      available: 0
+    }
+  }
 
   constructor (config: RegisterSolbotService = {}) {
     CookieManager.fromAxios(this.transport, config)
@@ -29,7 +34,7 @@ export class SolesbotService {
   }
 
   private async awaitMs (ms: number): Promise<void> {
-    return new Promise((resolve) => {
+    return await new Promise((resolve) => {
       setTimeout(() => {
         resolve()
       }, ms)
@@ -40,12 +45,12 @@ export class SolesbotService {
     this.transport.interceptors.response.use(async (response) => {
       const { data } = response
 
-      if (typeof data === 'string' && data.match(/Waiting Room/)) {
+      if (typeof data === 'string' && (data.match(/Waiting Room/) != null)) {
         console.warn('Waiting Room detected, waiting for 25 seconds to try again')
 
         await this.awaitMs(CONFIG.WAIT_ROOM_TIMEOUT)
 
-        return this.transport(response.config)
+        return await this.transport(response.config)
       }
 
       return response
@@ -60,11 +65,11 @@ export class SolesbotService {
 
   async login (email: string, password: string): Promise<void> {
     const data = qs.stringify({
-      'returnUrl': '',
-      'client_id': '',
-      'Email': email,
-      'Password': password,
-    });
+      returnUrl: '',
+      client_id: '',
+      Email: email,
+      Password: password
+    })
 
     const { data: response } = await this.transport.post<string>('/login', data, {
       method: 'POST',
@@ -73,31 +78,31 @@ export class SolesbotService {
       maxRedirects: 0,
       validateStatus: (status) => status >= 200 && status < 303,
       headers: {
-        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8', 
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
     })
 
-    if (!response.match(/\/dashboard/)) {
+    if (response.match(/\/dashboard/) == null) {
       throw new Error('Login failed')
     }
 
     console.log('Logged in')
 
-    await this.getBalanceData();
+    await this.getBalanceData()
   }
 
   async getPnl (): Promise<Pnl> {
     const [day, week, month] = await Promise.all([
       this.transport.get<BalanceResponse>('/wallet/getpnl', { params: { days: '1' } }),
       this.transport.get<BalanceResponse>('/wallet/getpnl', { params: { days: '7' } }),
-      this.transport.get<BalanceResponse>('/wallet/getpnl', { params: { days: '30' } }),
+      this.transport.get<BalanceResponse>('/wallet/getpnl', { params: { days: '30' } })
     ])
 
     return {
       day: +day.data,
       week: +week.data,
-      month: +month.data,
+      month: +month.data
     }
   }
 
@@ -110,34 +115,34 @@ export class SolesbotService {
   async getBalanceData (): Promise<UserBalance> {
     const [balance, available] = await Promise.all([
       this.transport.get<BalanceResponse>('/wallet/getbalanceusd'),
-      this.transport.get<BalanceResponse>('/wallet/getavaibalebalanceusd'),
+      this.transport.get<BalanceResponse>('/wallet/getavaibalebalanceusd')
     ])
 
     this.userBalance = {
       balance: {
         balance: +balance.data,
-        available: +available.data,
-      },
+        available: +available.data
+      }
     }
 
     return this.userBalance
   }
 
-  async getCoinDetails(coin: SolesBotCoins): Promise<CoinDetailsResponse> {
-    const { data } = await this.transport.get('/robot/suggestionManual',{
+  async getCoinDetails (coin: SolesBotCoins): Promise<CoinDetailsResponse> {
+    const { data } = await this.transport.get('/robot/suggestionManual', {
       params: {
-        coin: coin
+        coin
       }
     })
 
     return data
   }
 
-  async getCoins(coins: SolesBotCoins[]): Promise<CoinDetailsResponse[]> {
-    return Promise.all(coins.map((coin) => this.getCoinDetails(coin)))
+  async getCoins (coins: SolesBotCoins[]): Promise<CoinDetailsResponse[]> {
+    return await Promise.all(coins.map(async (coin) => await this.getCoinDetails(coin)))
   }
 
-  async getManualOperations(): Promise<ManualOperations[]> {
+  async getManualOperations (): Promise<ManualOperations[]> {
     const { data: { result } } = await this.transport.post<{ result: ManualOperationsResponse[] }>('/robot/getManualOperation?p=0&period=7')
 
     return result.map((operation): ManualOperations => ({
@@ -147,7 +152,7 @@ export class SolesbotService {
       hour: operation.Hour,
       coin: {
         id: getCoinByName(operation.Coin),
-        name: operation.Coin,
+        name: operation.Coin
       },
       exchanges: operation.Exchanges,
       prices: operation.Prices,
@@ -156,17 +161,17 @@ export class SolesbotService {
       percentWin: stringToNumber(operation.percentwin),
       transaction: operation.Transaction,
       status: operation.Situation,
-      link: operation.link,
+      link: operation.link
     }))
   }
 
-  async getPendingOperations(): Promise<ManualOperations[]> {
+  async getPendingOperations (): Promise<ManualOperations[]> {
     const operations = await this.getManualOperations()
 
     return operations.filter((operation) => operation.status === ManualOperationSituation.Pending)
   }
 
-  async buy(coin: SolesBotCoins, amount: number): Promise<void> {
+  async buy (coin: SolesBotCoins, amount: number): Promise<void> {
     console.log(`Buying ${amount} of ${coin}`)
   }
 }

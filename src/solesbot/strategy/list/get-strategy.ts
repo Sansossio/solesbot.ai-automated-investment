@@ -1,5 +1,5 @@
-import { SolesBotCoins } from "../../enum";
-import { SolesbotStrategy } from "../strategy";
+import { SolesBotCoins } from '../../enum'
+import { SolesbotStrategy } from '../strategy'
 
 export const Strategies = new Map<number, SolesbotStrategy>([
   [1, {
@@ -11,4 +11,4 @@ export const Strategies = new Map<number, SolesbotStrategy>([
       }
     ]
   }]
-]);
+])

@@ -1,8 +1,8 @@
-import { wait } from "../../libs/utils";
-import { CONFIG } from "../config";
-import { SolesbotService } from "../solesbot.service";
-import { CoinDetailsResponse } from "../types";
-import { CoinStrategy, SolesbotStrategy } from "./strategy";
+import { wait } from '../../libs/utils'
+import { CONFIG } from '../config'
+import { SolesbotService } from '../solesbot.service'
+import { CoinDetailsResponse } from '../types'
+import { CoinStrategy, SolesbotStrategy } from './strategy'
 
 export class StrategyRunner {
   constructor (
@@ -18,10 +18,10 @@ export class StrategyRunner {
 
     const availableStrategies = strategy.coins.filter(coin => {
       return !pendingOperations.some(operation => operation.coin.id === coin.coin)
-    });
+    })
 
     for (const coin of availableStrategies) {
-      let coinDetails = await this.service.getCoinDetails(coin.coin)
+      const coinDetails = await this.service.getCoinDetails(coin.coin)
 
       if (!this.hasEnoughBalance(coin)) {
         console.log(`Not enough balance to buy ${coin.coin}`)
@@ -45,11 +45,11 @@ export class StrategyRunner {
     }
   }
 
-  private hasEnoughBalance (coin: CoinStrategy) {
-    return this.service.balances.balance.available >= coin.amount || coin.fill
+  private hasEnoughBalance (coin: CoinStrategy): boolean {
+    return this.service.balances.balance.available >= coin.amount || Boolean(coin.fill)
   }
 
-  private async minProfitRetry (coin: CoinStrategy, coinDetails: CoinDetailsResponse) {
+  private async minProfitRetry (coin: CoinStrategy, coinDetails: CoinDetailsResponse): Promise<void> {
     for (let i = 0; i <= CONFIG.WAIT_PROFIT.RETRIES; i++) {
       if (coin.minProfit > coinDetails.profit) {
         await this.wait(CONFIG.WAIT_PROFIT.TIME)

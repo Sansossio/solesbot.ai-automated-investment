@@ -12,18 +12,19 @@ export enum SolesBotCoins {
   UNKNOWN = -1,
 }
 
-type SolesBotConfig = {
-  duration: number;
-  maxAmount: number;
-  roi: number;
-  netProfit: number;
+interface SolesBotConfig {
+  duration: number
+  maxAmount: number
+  roi: number
+  netProfit: number
 }
 
-export function getCoinByName(name: string): SolesBotCoins {
-  const keys = Object.keys(SolesBotCoins);
-  const key = keys.find((key) => name.match(new RegExp(key, 'i')));
+export function getCoinByName (name: string): SolesBotCoins {
+  const keys = Object.keys(SolesBotCoins)
+  const key = keys.find((key) => name.match(new RegExp(key, 'i')))
 
-  return SolesBotCoins[key as keyof typeof SolesBotCoins] || SolesBotCoins.UNKNOWN;
+  // eslint-disable-next-line
+  return SolesBotCoins[key as keyof typeof SolesBotCoins] || SolesBotCoins.UNKNOWN
 }
 
 export const CoinsConfig: Map<SolesBotCoins, SolesBotConfig> = new Map([
@@ -36,5 +37,5 @@ export const CoinsConfig: Map<SolesBotCoins, SolesBotConfig> = new Map([
   [SolesBotCoins.Fantom, { duration: 200, maxAmount: 100, roi: 1.68, netProfit: 1.01 }],
   [SolesBotCoins.Polkadot, { duration: 60, maxAmount: 500, roi: 0.91, netProfit: 0.55 }],
   [SolesBotCoins.Avalanche, { duration: 200, maxAmount: 500, roi: 0.81, netProfit: 0.49 }],
-  [SolesBotCoins.Chainlink, { duration: 200, maxAmount: 500, roi: 0.86, netProfit: 0.52 }],
-]);
+  [SolesBotCoins.Chainlink, { duration: 200, maxAmount: 500, roi: 0.86, netProfit: 0.52 }]
+])

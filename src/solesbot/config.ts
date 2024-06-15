@@ -3,10 +3,10 @@ export const CONFIG = {
   WAIT_ROOM_TIMEOUT: 1000 * 25,
   BUCKET: 'solesbot',
   COOKIES: {
-    PATH: 'cookies.json',
+    PATH: 'cookies.json'
   },
   WAIT_PROFIT: {
     TIME: 18 * 1000, // 18 seconds
-    RETRIES: 10, // 3 minutes
+    RETRIES: 10 // 3 minutes
   }
 }

@@ -1,13 +1,13 @@
-import { formatJSONResponse, type ValidatedEventAPIGatewayProxyEvent } from '@/libs/api-gateway';
-import { SolesBotCoins, SolesbotOperatorEvent, SolesbotService } from '@/solesbot';
-import { SQSHandler } from 'aws-lambda';
+import { formatJSONResponse, type ValidatedEventAPIGatewayProxyEvent } from '@/libs/api-gateway'
+import { SolesBotCoins, SolesbotOperatorEvent, SolesbotService } from '@/solesbot'
+import { SQSHandler } from 'aws-lambda'
 
-const operator = async (event: SolesbotOperatorEvent) => {
-  const initialCookies = event.cookies ? new Map<string, string | number>(Object.entries(event.cookies)) : undefined;
+const operator = async (event: SolesbotOperatorEvent): Promise<any> => {
+  const initialCookies = (event.cookies != null) ? new Map<string, string | number>(Object.entries(event.cookies)) : undefined
 
   const service = new SolesbotService({
-    initialCookies,
-  });
+    initialCookies
+  })
 
   await service.login(
     event.email,
@@ -24,26 +24,26 @@ const operator = async (event: SolesbotOperatorEvent) => {
   const [pendingOperations, [cake, polkadot]] = await Promise.all([
     service.getPendingOperations(),
     service.getCoins(coins)
-  ]);
+  ])
 
   console.log({
     data,
     pendingOperations,
     cake,
-    polkadot,
-  });
-};
+    polkadot
+  })
+}
 
 export const main: SQSHandler | ValidatedEventAPIGatewayProxyEvent<any> = async event => {
-  const records = 'Records' in event ? event.Records : JSON.parse(event.body).Records;
+  const records = 'Records' in event ? event.Records : JSON.parse(event.body).Records
 
   for (const record of records) {
-    const body = 'body' in record ? JSON.parse(record.body) : record;
+    const body = 'body' in record ? JSON.parse(record.body) : record
 
-    await operator(body);
+    await operator(body)
   }
 
   return formatJSONResponse({
     message: 'Processed'
-  }) as any;
+  })
 }
