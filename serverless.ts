@@ -52,7 +52,8 @@ const serverlessConfiguration: AWS = {
         Type: 'AWS::SQS::Queue',
         Properties: {
           QueueName: 'solesbot-aws-operate',
-          VisibilityTimeout: 10 * 60 // 10 minutes
+          VisibilityTimeout: 10 * 60, // 10 minutes
+          MaxRetries: 1
         }
       }
     }

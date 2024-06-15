@@ -23,6 +23,6 @@ const cloudEvents = [
 export default {
   handler: `${handlerPath(__dirname)}/handler.main`,
   timeout: 6 * 60, // 6 minutes
-  memorySize: 128,
+  memorySize: 256,
   events: process.env.NODE_ENV === 'local' ? localEvents : cloudEvents
 }

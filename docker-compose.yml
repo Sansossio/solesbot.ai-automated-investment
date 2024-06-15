@@ -12,6 +12,7 @@ services:
       - DEBUG=${DEBUG:-0}
       - USE_SINGLE_REGION=1
       - DEFAULT_REGION=${DEFAULT_REGION:-us-east-1}
+      - PERSISTENCE=1
     volumes:
       - "${LOCALSTACK_VOLUME_DIR:-./localstack}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
