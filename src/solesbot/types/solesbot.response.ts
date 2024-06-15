@@ -14,17 +14,17 @@ export type HomeResponse = {
   username: string;
 };
 
-export type InitialDataResponse = {
-  home: HomeResponse;
+export type UserBalance = {
   balance: {
     balance: number;
     available: number;
   }
-  pnl: {
-    day: number;
-    week: number;
-    month: number;
-  }
+};
+
+export type Pnl = {
+  day: number;
+  week: number;
+  month: number;
 };
 
 export type CoinDetailsResponse = {

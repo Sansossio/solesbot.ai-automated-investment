@@ -14,7 +14,7 @@ const operator = async (event: SolesbotOperatorEvent) => {
     event.password
   )
 
-  const data = await service.getData()
+  const data = await service.getBalanceData()
 
   const coins = [
     SolesBotCoins.CAKE,

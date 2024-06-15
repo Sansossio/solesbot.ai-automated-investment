@@ -2,7 +2,7 @@ import axios from 'axios'
 import qs from 'qs'
 import { CookieManager } from "@/libs/cookie.manager";
 import { CONFIG } from './config';
-import { BalanceResponse, CoinDetailsResponse, HomeResponse, InitialDataResponse, ManualOperations, ManualOperationsResponse } from './types/solesbot.response';
+import { BalanceResponse, CoinDetailsResponse, HomeResponse, UserBalance, ManualOperations, ManualOperationsResponse, Pnl } from './types/solesbot.response';
 import { SolesBotCoins, getCoinByName } from './enum/coins';
 import { ManualOperationSituation } from './enum/manual-operation-situation';
 import { stringToNumber } from '@/libs/utils';
@@ -17,15 +17,15 @@ export class SolesbotService {
   private readonly transport = axios.create({
     baseURL: CONFIG.URL,
   });
-  private userData: InitialDataResponse;
+  private userBalance: UserBalance;
 
   constructor (config: RegisterSolbotService = {}) {
     CookieManager.fromAxios(this.transport, config)
     this.waitingRoom()
   }
 
-  get user (): InitialDataResponse {
-    return this.userData
+  get balances (): UserBalance {
+    return this.userBalance
   }
 
   private async awaitMs (ms: number): Promise<void> {
@@ -84,10 +84,10 @@ export class SolesbotService {
 
     console.log('Logged in')
 
-    await this.getData();
+    await this.getBalanceData();
   }
 
-  async getPnl (): Promise<{ day: number; week: number; month: number }> {
+  async getPnl (): Promise<Pnl> {
     const [day, week, month] = await Promise.all([
       this.transport.get<BalanceResponse>('/wallet/getpnl', { params: { days: '1' } }),
       this.transport.get<BalanceResponse>('/wallet/getpnl', { params: { days: '7' } }),
@@ -101,24 +101,26 @@ export class SolesbotService {
     }
   }
 
-  async getData (): Promise<InitialDataResponse> {
-    const [dataHome, balance, available, pnl] = await Promise.all([
-      this.transport.get<HomeResponse>('/home/dataHome'),
+  async getHome (): Promise<HomeResponse> {
+    const { data } = await this.transport.get<HomeResponse>('/home/dataHome')
+
+    return data
+  }
+
+  async getBalanceData (): Promise<UserBalance> {
+    const [balance, available] = await Promise.all([
       this.transport.get<BalanceResponse>('/wallet/getbalanceusd'),
       this.transport.get<BalanceResponse>('/wallet/getavaibalebalanceusd'),
-      this.getPnl(),
     ])
 
-    this.userData = {
-      home: dataHome.data,
+    this.userBalance = {
       balance: {
         balance: +balance.data,
         available: +available.data,
       },
-      pnl,
     }
 
-    return this.userData
+    return this.userBalance
   }
 
   async getCoinDetails(coin: SolesBotCoins): Promise<CoinDetailsResponse> {

@@ -30,7 +30,7 @@ export class StrategyRunner {
 
       await this.minProfitRetry(coin, coinDetails)
 
-      const amount = Math.min(coin.amount, this.service.user.balance.available)
+      const amount = Math.min(coin.amount, this.service.balances.balance.available)
 
       if (amount < 1) {
         console.log(`Not enough balance to buy ${coin.coin}`)
@@ -46,7 +46,7 @@ export class StrategyRunner {
   }
 
   private hasEnoughBalance (coin: CoinStrategy) {
-    return this.service.user.balance.available >= coin.amount || coin.fill
+    return this.service.balances.balance.available >= coin.amount || coin.fill
   }
 
   private async minProfitRetry (coin: CoinStrategy, coinDetails: CoinDetailsResponse) {

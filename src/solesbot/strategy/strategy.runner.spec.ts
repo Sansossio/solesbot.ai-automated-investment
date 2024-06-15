@@ -10,7 +10,7 @@ describe('StrategyRunner', () => {
   const getPendingOperations = jest.spyOn(service, 'getPendingOperations');
   const getCoinDetails = jest.spyOn(service, 'getCoinDetails');
   const buy = jest.spyOn(service, 'buy');
-  const user = jest.spyOn(service, 'user', 'get');
+  const balances = jest.spyOn(service, 'balances', 'get');
   const wait = jest.spyOn(runner, 'wait');
 
   beforeEach(() => {
@@ -23,7 +23,7 @@ describe('StrategyRunner', () => {
 
   describe('simple strategy', () => {
     it('should buy coin when profit is greater than minProfit', async () => {
-      user.mockReturnValue({
+      balances.mockReturnValue({
         balance: {
           available: 1,
           balance: 1
@@ -50,7 +50,7 @@ describe('StrategyRunner', () => {
     });
 
     it('should continue when fails', async () => {
-      user.mockReturnValue({
+      balances.mockReturnValue({
         balance: {
           available: 1,
           balance: 1
@@ -79,7 +79,7 @@ describe('StrategyRunner', () => {
     });
 
     it('should not buy coin when profit is less than minProfit', async () => {
-      user.mockReturnValue({
+      balances.mockReturnValue({
         balance: {
           available: 1,
           balance: 1
@@ -106,7 +106,7 @@ describe('StrategyRunner', () => {
     });
 
     it('should not buy coin when balance is less than amount', async () => {
-      user.mockReturnValue({
+      balances.mockReturnValue({
         balance: {
           available: 0,
           balance: 0
@@ -133,7 +133,7 @@ describe('StrategyRunner', () => {
     });
 
     it('should not buy when coin is pending', async () => {
-      user.mockReturnValue({
+      balances.mockReturnValue({
         balance: {
           available: 1,
           balance: 1
@@ -168,7 +168,7 @@ describe('StrategyRunner', () => {
 
   describe('fill', () => {
     it('should buy coin when fill is true', async () => {
-      user.mockReturnValue({
+      balances.mockReturnValue({
         balance: {
           available: 100,
           balance: 0
@@ -196,7 +196,7 @@ describe('StrategyRunner', () => {
     });
 
     it('should not buy coin when amount is less than 1', async () => {
-      user.mockReturnValue({
+      balances.mockReturnValue({
         balance: {
           available: 0,
           balance: 0.02
@@ -226,7 +226,7 @@ describe('StrategyRunner', () => {
 
   describe('retries', () => {
     it('should retry until profit is greater than minProfit', async () => {
-      user.mockReturnValue({
+      balances.mockReturnValue({
         balance: {
           available: 1,
           balance: 1
@@ -269,7 +269,7 @@ describe('StrategyRunner', () => {
             balance: 1700
           },
         } as any;
-        user.mockReturnValue(userBalance);
+        balances.mockReturnValue(userBalance);
 
         buy.mockImplementation(async (_coin, amount) => {
           userBalance.balance.available -= amount;
@@ -322,7 +322,7 @@ describe('StrategyRunner', () => {
             balance: 1500
           },
         } as any;
-        user.mockReturnValue(userBalance);
+        balances.mockReturnValue(userBalance);
 
         buy.mockImplementation(async (_coin, amount) => {
           userBalance.balance.available -= amount;
