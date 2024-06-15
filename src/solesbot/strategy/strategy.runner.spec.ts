@@ -259,4 +259,119 @@ describe('StrategyRunner', () => {
       expect(wait).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('advanced strategies', () => {
+    describe('full Polkadot', () => {
+      it('should buy Polkadot when profit is greater than minProfit', async () => {
+        const userBalance = {
+          balance: {
+            available: 1700,
+            balance: 1700
+          },
+        } as any;
+        user.mockReturnValue(userBalance);
+
+        buy.mockImplementation(async (_coin, amount) => {
+          userBalance.balance.available -= amount;
+        });
+
+        getPendingOperations
+          .mockResolvedValue([]);
+
+        getCoinDetails
+          .mockResolvedValueOnce({
+            profit: 0.1
+          })
+          .mockResolvedValueOnce({
+            profit: 0.9
+          })
+          .mockResolvedValueOnce({
+            profit: 0.1
+          })
+          .mockResolvedValueOnce({
+            profit: 0.9
+          })
+          .mockResolvedValueOnce({
+            profit: 1
+          });
+
+        for (let i = 0; i < 3; i++) {
+          await runner.run({
+            coins: [
+              {
+                coin: SolesBotCoins.Polkadot,
+                amount: 500,
+                minProfit: 0.81
+              }
+            ]
+          });
+        }
+
+        expect(buy).toHaveBeenNthCalledWith(1, SolesBotCoins.Polkadot, 500);
+        expect(buy).toHaveBeenNthCalledWith(2, SolesBotCoins.Polkadot, 500);
+        expect(buy).toHaveBeenNthCalledWith(3, SolesBotCoins.Polkadot, 500);
+
+        expect(buy).toHaveBeenCalledTimes(3);
+        expect(wait).toHaveBeenCalledTimes(2);
+      });
+
+      it('should buy Polkadot with fill', async () => {
+        const userBalance = {
+          balance: {
+            available: 1200,
+            balance: 1500
+          },
+        } as any;
+        user.mockReturnValue(userBalance);
+
+        buy.mockImplementation(async (_coin, amount) => {
+          userBalance.balance.available -= amount;
+        });
+
+        getPendingOperations
+          .mockResolvedValue([]);
+
+        getCoinDetails
+          .mockResolvedValueOnce({
+            profit: 0.1
+          })
+          .mockResolvedValueOnce({
+            profit: 0.9
+          })
+          .mockResolvedValueOnce({
+            profit: 0.1
+          })
+          .mockResolvedValueOnce({
+            profit: 0.9
+          })
+          .mockResolvedValueOnce({
+            profit: 1
+          })
+
+        for (let i = 0; i < 3; i++) {
+          await runner.run({
+            coins: [
+              {
+                coin: SolesBotCoins.Polkadot,
+                amount: 500,
+                minProfit: 0.81,
+                fill: true
+              }
+            ]
+          });
+
+        }
+
+        expect(buy).toHaveBeenCalledTimes(3);
+
+        expect(buy).toHaveBeenNthCalledWith(1, SolesBotCoins.Polkadot, 500);
+        expect(buy).toHaveBeenNthCalledWith(2, SolesBotCoins.Polkadot, 500);
+        expect(buy).toHaveBeenNthCalledWith(3, SolesBotCoins.Polkadot, 200);
+
+
+        expect(buy).toHaveBeenCalledTimes(3);
+        expect(wait).toHaveBeenCalledTimes(2);
+      });
+    })
+  });
 });
