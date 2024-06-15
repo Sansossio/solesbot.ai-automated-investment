@@ -1,7 +1,8 @@
 import { wait } from "../../libs/utils";
 import { CONFIG } from "../config";
 import { SolesbotService } from "../solesbot.service";
-import { SolesbotStrategy } from "./strategy";
+import { CoinDetailsResponse } from "../types";
+import { CoinStrategy, SolesbotStrategy } from "./strategy";
 
 export class StrategyRunner {
   constructor (
@@ -22,22 +23,12 @@ export class StrategyRunner {
     for (const coin of availableStrategies) {
       let coinDetails = await this.service.getCoinDetails(coin.coin)
 
-      if (this.service.user.balance.available < coin.amount && !coin.fill) {
+      if (!this.hasEnoughBalance(coin)) {
         console.log(`Not enough balance to buy ${coin.coin}`)
         continue
       }
 
-      for (let i = 0; i <= CONFIG.WAIT_PROFIT.RETRIES; i++) {
-        if (coin.minProfit > coinDetails.profit) {
-          await this.wait(CONFIG.WAIT_PROFIT.TIME)
-
-          coinDetails = await this.service.getCoinDetails(coin.coin)
-
-          continue
-        }
-
-        break
-      }
+      await this.minProfitRetry(coin, coinDetails)
 
       const amount = Math.min(coin.amount, this.service.user.balance.available)
 
@@ -51,6 +42,24 @@ export class StrategyRunner {
       } catch (e) {
         console.error(`Error buying ${coin.coin}`, e)
       }
+    }
+  }
+
+  private hasEnoughBalance (coin: CoinStrategy) {
+    return this.service.user.balance.available >= coin.amount || coin.fill
+  }
+
+  private async minProfitRetry (coin: CoinStrategy, coinDetails: CoinDetailsResponse) {
+    for (let i = 0; i <= CONFIG.WAIT_PROFIT.RETRIES; i++) {
+      if (coin.minProfit > coinDetails.profit) {
+        await this.wait(CONFIG.WAIT_PROFIT.TIME)
+
+        coinDetails = await this.service.getCoinDetails(coin.coin)
+
+        continue
+      }
+
+      break
     }
   }
 }
