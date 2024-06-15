@@ -5,7 +5,8 @@ import { SolesbotService } from '../solesbot.service'
 import { StrategyRunner } from './strategy.runner'
 
 jest.mock('../../libs/utils', () => ({
-  wait: jest.fn()
+  wait: jest.fn(),
+  solesBotNumberFormat: (n: number) => n
 }))
 
 describe('StrategyRunner', () => {
@@ -19,6 +20,10 @@ describe('StrategyRunner', () => {
 
   afterEach(() => {
     jest.resetAllMocks()
+  })
+
+  beforeEach(() => {
+    buy.mockImplementation(async () => {})
   })
 
   describe('simple strategy', () => {
@@ -45,7 +50,7 @@ describe('StrategyRunner', () => {
         ]
       })
 
-      expect(buy).toHaveBeenCalledWith(SolesBotCoins.CAKE, 1)
+      expect(buy).toHaveBeenCalledWith(expect.objectContaining({ coin: SolesBotCoins.CAKE, amount: 1 }))
       expect(wait).not.toHaveBeenCalled()
     })
 
@@ -74,7 +79,7 @@ describe('StrategyRunner', () => {
         ]
       })
 
-      expect(buy).toHaveBeenCalledWith(SolesBotCoins.CAKE, 1)
+      expect(buy).toHaveBeenCalledWith(expect.objectContaining({ coin: SolesBotCoins.CAKE, amount: 1 }))
       expect(wait).not.toHaveBeenCalled()
     })
 
@@ -202,7 +207,7 @@ describe('StrategyRunner', () => {
         ]
       })
 
-      expect(buy).toHaveBeenCalledWith(SolesBotCoins.CAKE, 100)
+      expect(buy).toHaveBeenCalledWith(expect.objectContaining({ coin: SolesBotCoins.CAKE, amount: 100 }))
       expect(wait).not.toHaveBeenCalled()
     })
 
@@ -282,8 +287,8 @@ describe('StrategyRunner', () => {
         } as any
         balances.mockReturnValue(userBalance)
 
-        buy.mockImplementation(async (_coin, amount) => {
-          userBalance.balance.available -= amount
+        buy.mockImplementation(async ({ amount }) => {
+          userBalance.balance.available -= +amount
         })
 
         getPendingOperations
@@ -318,9 +323,9 @@ describe('StrategyRunner', () => {
           })
         }
 
-        expect(buy).toHaveBeenNthCalledWith(1, SolesBotCoins.Polkadot, 500)
-        expect(buy).toHaveBeenNthCalledWith(2, SolesBotCoins.Polkadot, 500)
-        expect(buy).toHaveBeenNthCalledWith(3, SolesBotCoins.Polkadot, 500)
+        expect(buy).toHaveBeenNthCalledWith(1, expect.objectContaining({ coin: SolesBotCoins.Polkadot, amount: 500 }))
+        expect(buy).toHaveBeenNthCalledWith(2, expect.objectContaining({ coin: SolesBotCoins.Polkadot, amount: 500 }))
+        expect(buy).toHaveBeenNthCalledWith(3, expect.objectContaining({ coin: SolesBotCoins.Polkadot, amount: 500 }))
 
         expect(buy).toHaveBeenCalledTimes(3)
         expect(wait).toHaveBeenCalledTimes(2)
@@ -335,8 +340,8 @@ describe('StrategyRunner', () => {
         } as any
         balances.mockReturnValue(userBalance)
 
-        buy.mockImplementation(async (_coin, amount) => {
-          userBalance.balance.available -= amount
+        buy.mockImplementation(async ({ amount }) => {
+          userBalance.balance.available -= +amount
         })
 
         getPendingOperations
@@ -374,9 +379,9 @@ describe('StrategyRunner', () => {
 
         expect(buy).toHaveBeenCalledTimes(3)
 
-        expect(buy).toHaveBeenNthCalledWith(1, SolesBotCoins.Polkadot, 500)
-        expect(buy).toHaveBeenNthCalledWith(2, SolesBotCoins.Polkadot, 500)
-        expect(buy).toHaveBeenNthCalledWith(3, SolesBotCoins.Polkadot, 200)
+        expect(buy).toHaveBeenNthCalledWith(1, expect.objectContaining({ coin: SolesBotCoins.Polkadot, amount: 500 }))
+        expect(buy).toHaveBeenNthCalledWith(2, expect.objectContaining({ coin: SolesBotCoins.Polkadot, amount: 500 }))
+        expect(buy).toHaveBeenNthCalledWith(3, expect.objectContaining({ coin: SolesBotCoins.Polkadot, amount: 200 }))
 
         expect(buy).toHaveBeenCalledTimes(3)
         expect(wait).toHaveBeenCalledTimes(2)
@@ -433,9 +438,9 @@ describe('StrategyRunner', () => {
         budget: 1000
       })
 
-      expect(buy).toHaveBeenNthCalledWith(1, SolesBotCoins.CAKE, 30)
-      expect(buy).toHaveBeenNthCalledWith(2, SolesBotCoins.Polkadot, 500)
-      expect(buy).toHaveBeenNthCalledWith(3, SolesBotCoins.Avalanche, 320)
+      expect(buy).toHaveBeenNthCalledWith(1, expect.objectContaining({ coin: SolesBotCoins.CAKE, amount: 30 }))
+      expect(buy).toHaveBeenNthCalledWith(2, expect.objectContaining({ coin: SolesBotCoins.Polkadot, amount: 500 }))
+      expect(buy).toHaveBeenNthCalledWith(3, expect.objectContaining({ coin: SolesBotCoins.Avalanche, amount: 320 }))
       expect(wait).not.toHaveBeenCalled()
     })
 
@@ -486,8 +491,8 @@ describe('StrategyRunner', () => {
         budget: 1000
       })
 
-      expect(buy).toHaveBeenNthCalledWith(1, SolesBotCoins.CAKE, 30)
-      expect(buy).toHaveBeenNthCalledWith(2, SolesBotCoins.Polkadot, 500)
+      expect(buy).toHaveBeenNthCalledWith(1, expect.objectContaining({ coin: SolesBotCoins.CAKE, amount: 30 }))
+      expect(buy).toHaveBeenNthCalledWith(2, expect.objectContaining({ coin: SolesBotCoins.Polkadot, amount: 500 }))
       expect(buy).toHaveBeenCalledTimes(2)
       expect(wait).not.toHaveBeenCalled()
     })
@@ -641,7 +646,7 @@ describe('StrategyRunner', () => {
 
       const allBuys = expectedBuys.flat()
       for (const [i, [coin, amount]] of allBuys.entries()) {
-        expect(buy).toHaveBeenNthCalledWith(i + 1, coin, amount)
+        expect(buy).toHaveBeenNthCalledWith(i + 1, expect.objectContaining({ coin, amount }))
       }
     })
   })

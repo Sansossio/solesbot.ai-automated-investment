@@ -5,3 +5,7 @@ export async function wait (ms: number): Promise<void> {
 export function stringToNumber (value: string): number {
   return parseFloat(value.replace(',', '.'))
 }
+
+export function solesBotNumberFormat (value: number): string {
+  return value.toFixed(2).replace('.', ',')
+}

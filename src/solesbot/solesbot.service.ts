@@ -2,7 +2,7 @@ import axios from 'axios'
 import * as qs from 'qs'
 import { CookieManager, Cookies } from '@/libs/cookie.manager'
 import { CONFIG } from './config'
-import { BalanceResponse, CoinDetailsResponse, HomeResponse, UserBalance, ManualOperations, ManualOperationsResponse, Pnl } from './types/solesbot.response'
+import { BalanceResponse, CoinDetailsResponse, HomeResponse, UserBalance, ManualOperations, ManualOperationsResponse, Pnl, BuyPayload } from './types/solesbot.response'
 import { SolesBotCoins, getCoinByName } from './enum/coins'
 import { ManualOperationSituation } from './enum/manual-operation-situation'
 import { stringToNumber } from '@/libs/utils'
@@ -171,7 +171,7 @@ export class SolesbotService {
     return operations.filter((operation) => operation.status !== ManualOperationSituation.Executed)
   }
 
-  async buy (coin: SolesBotCoins, amount: number): Promise<void> {
-    console.log(`Buying ${amount} of ${coin}`)
+  async buy (payload: BuyPayload): Promise<void> {
+    await this.transport.post('/robot/submitsuggestion', payload)
   }
 }

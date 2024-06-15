@@ -1,4 +1,4 @@
-import { wait } from '../../libs/utils'
+import { solesBotNumberFormat, wait } from '../../libs/utils'
 import { CONFIG } from '../config'
 import { SolesbotService } from '../solesbot.service'
 import { CoinDetailsResponse, ManualOperations } from '../types'
@@ -41,7 +41,13 @@ export class StrategyRunner {
       const amount = Math.min(coin.amount, budget)
 
       try {
-        await this.service.buy(coin.coin, amount)
+        await this.service.buy({
+          amount: solesBotNumberFormat(amount),
+          coin: coin.coin,
+          idbuy: coinDetails.buy?.id ?? 0,
+          idsell: coinDetails.sell?.id ?? 0,
+          sug: true
+        })
 
         if (strategy.budget !== undefined) {
           strategy.budget -= amount
