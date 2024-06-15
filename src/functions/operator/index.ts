@@ -1,6 +1,6 @@
 import { handlerPath } from '@/libs/handler-resolver';
 
-const events: any = [
+const localEvents = [
   {
     http: {
       method: 'post',
@@ -9,19 +9,20 @@ const events: any = [
   }
 ];
 
-if (process.env.NODE_ENV !== 'local') {
-  events.push({
+const cloudEvents = [
+  {
     sqs: {
       arn: {
         'Fn::GetAtt': ['SolesbotOperateQueue', 'Arn'],
       },
+      maximumConcurrency: 20,
     },
-  });
-}
+  }
+];
 
 export default {
   handler: `${handlerPath(__dirname)}/handler.main`,
-  timeout: 10 * 60, // 10 minutes
+  timeout: 6 * 60, // 6 minutes
   memorySize: 128,
-  events,
+  events: process.env.NODE_ENV === 'local' ? localEvents : cloudEvents,
 };
