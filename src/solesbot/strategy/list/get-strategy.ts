@@ -1,8 +1,13 @@
 import { SolesBotCoins } from '../../enum'
 import { SolesbotStrategy } from '../strategy'
 
+export enum STRATEGY {
+  Polkadot = 1,
+  Multi1K = 2
+}
+
 export const Strategies = new Map<number, SolesbotStrategy>([
-  [1, {
+  [STRATEGY.Polkadot, {
     coins: [
       {
         coin: SolesBotCoins.Polkadot,
@@ -11,7 +16,7 @@ export const Strategies = new Map<number, SolesbotStrategy>([
       }
     ]
   }],
-  [2, {
+  [STRATEGY.Multi1K, {
     coins: [
       {
         coin: SolesBotCoins.CAKE,

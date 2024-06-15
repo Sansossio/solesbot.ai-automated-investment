@@ -23,7 +23,7 @@ async function updateCookies (cookies: Cookies): Promise<void> {
 export const main: ValidatedEventAPIGatewayProxyEvent<any> = async (_event) => {
   const cookiesSaved = await s3Service.getObjectParsed(bucketName, keyName)
 
-  const initialCookies = typeof cookiesSaved === 'object' ? new Map<string, string | number>(Object.entries(cookiesSaved)) : undefined
+  const initialCookies = typeof cookiesSaved === 'object' && cookiesSaved != null ? new Map<string, string | number>(Object.entries(cookiesSaved)) : undefined
 
   const service = new SolesbotService({
     initialCookies,
@@ -43,7 +43,7 @@ export const main: ValidatedEventAPIGatewayProxyEvent<any> = async (_event) => {
       email: account.email,
       password: account.password,
       cookies: cookiesAsObject,
-      strategies: [1]
+      strategies: account.strategies
     })
   }
 
