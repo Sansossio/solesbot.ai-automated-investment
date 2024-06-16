@@ -85,13 +85,15 @@ export interface ManualOperations {
   link: string
 }
 
-/**
- * {"amount":"5000,00","idbuy":2,"idsell":1,"sug":true,"coin":1}
- */
 export interface BuyPayload {
   amount: string
   idbuy: number
   idsell: number
   sug: boolean
   coin: SolesBotCoins
+}
+
+export interface BuyResponse {
+  haserror: boolean
+  error: string
 }

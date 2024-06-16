@@ -2,8 +2,8 @@ import axios from 'axios'
 import * as qs from 'qs'
 import { CookieManager, Cookies } from '@/libs/cookie.manager'
 import { CONFIG } from './config'
-import { BalanceResponse, CoinDetailsResponse, HomeResponse, UserBalance, ManualOperations, ManualOperationsResponse, Pnl, BuyPayload } from './types/solesbot.response'
-import { SolesBotCoins, getCoinByName } from './enum/coins'
+import { BalanceResponse, CoinDetailsResponse, HomeResponse, UserBalance, ManualOperations, ManualOperationsResponse, Pnl, BuyPayload, BuyResponse } from './types/solesbot.response'
+import { CoinsConfig, SolesBotCoins, getCoinByName } from './enum/coins'
 import { ManualOperationSituation } from './enum/manual-operation-situation'
 import { stringToNumber } from '@/libs/utils'
 
@@ -168,10 +168,25 @@ export class SolesbotService {
   async getPendingOperations (): Promise<ManualOperations[]> {
     const operations = await this.getManualOperations()
 
-    return operations.filter((operation) => operation.status !== ManualOperationSituation.Executed)
+    return operations
+      .filter(
+        (operation) => {
+          const coinConfig = CoinsConfig.get(operation.coin.id)
+
+          if (coinConfig !== undefined && coinConfig.alwaysAvailable === true) {
+            return false
+          }
+
+          return operation.status !== ManualOperationSituation.Executed
+        }
+      )
   }
 
   async buy (payload: BuyPayload): Promise<void> {
-    await this.transport.post('/robot/submitsuggestion', payload)
+    const { data: { haserror, error } } = await this.transport.post<BuyResponse>('/robot/submitsuggestion', payload)
+
+    if (haserror) {
+      throw new Error(error)
+    }
   }
 }
